@@ -3,25 +3,21 @@ FROM eclipse-temurin:21-jdk AS builder
 
 WORKDIR /app
 
-# Copy Maven wrapper and project files
-COPY mvnw .
+COPY mvnw .          
 COPY .mvn/ .mvn
 COPY pom.xml ./
 COPY src ./src
 
-# Give execute permission to Maven wrapper
+# Give execute permission for mvnw
 RUN chmod +x mvnw
 
-# Build the Spring Boot jar
 RUN ./mvnw clean package -DskipTests
 
 # Stage 2: Run the app
 FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
-
-# ✅ Copy the correct jar (handles both normal or exec jar)
-COPY target/*SNAPSHOT*.jar app.jar
+COPY --from=builder /app/target/*.jar app.jar
 
 EXPOSE 2000
 
